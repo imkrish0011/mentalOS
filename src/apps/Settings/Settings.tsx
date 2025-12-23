@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { Settings as SettingsIcon, User, Shield, Info, LogOut, Layout, Bell, BookOpen } from 'lucide-react';
+import { Settings as SettingsIcon, User, Shield, Info, LogOut, BookOpen } from 'lucide-react';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { UserManual } from '../../components/UI/UserManual';
 
