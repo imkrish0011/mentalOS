@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { Activity, Brain, CheckCircle2, AlertTriangle, Zap, Scale, Layers } from 'lucide-react';
-import { getHabits, getGoals, getDecisions, getMoodLogs, getHabitLogs } from '../../lib/firestoreService';
+import { getHabits, getGoals, getMoodLogs, getHabitLogs } from '../../lib/firestoreService';
 import { useToastStore } from '../../stores/toastStore';
-import type { Goal, Habit, Decision, MoodLog } from '../../types';
+import type { Goal, Habit, MoodLog } from '../../types';
 
 export const CLMApp: React.FC = () => {
     const { user } = useAuth();
@@ -12,7 +12,6 @@ export const CLMApp: React.FC = () => {
     // Data State
     const [activeGoals, setActiveGoals] = useState<Goal[]>([]);
     const [habits, setHabits] = useState<Habit[]>([]);
-    const [todayDecisions, setTodayDecisions] = useState<Decision[]>([]);
     const [latestMood, setLatestMood] = useState<MoodLog | null>(null);
     const [completedHabitCount, setCompletedHabitCount] = useState(0);
 
@@ -48,16 +47,7 @@ export const CLMApp: React.FC = () => {
             // and maybe refined later. For now, active habits = load.
             setCompletedHabitCount(0); // Placeholder if we don't query every log
 
-            // 3. Fetch Decisions (Decision Fatigue)
-            const decisions = await getDecisions(user.uid, 10); // get last 10, filter for today
-            const todayDate = new Date().toLocaleDateString();
-            const todayDecs = decisions.filter(d =>
-                // Handle different date formats or timestamps if needed, simplistic check:
-                (d.createdAt as any)?.toDate ? (d.createdAt as any).toDate().toLocaleDateString() === todayDate : true
-            );
-            setTodayDecisions(todayDecs);
-
-            // 4. Fetch Mood (Emotional Load)
+            // 3. Fetch Mood (Emotional Load)
             const moodLogs = await getMoodLogs(user.uid, 1);
             if (moodLogs.length > 0) {
                 setLatestMood(moodLogs[0]);
@@ -72,7 +62,7 @@ export const CLMApp: React.FC = () => {
     useEffect(() => {
         if (isLoading) return;
         calculateMetrics();
-    }, [activeGoals, habits, todayDecisions, latestMood, isLoading]);
+    }, [activeGoals, habits, latestMood, isLoading]);
 
     const calculateMetrics = () => {
         let score = 0;
@@ -88,12 +78,7 @@ export const CLMApp: React.FC = () => {
         score += habitImpact;
         if (habitImpact > 25) stressors.push({ name: 'Daily Routine', impact: habitImpact });
 
-        // 3. Decision Fatigue
-        const decisionImpact = todayDecisions.length * 5; // 5% per decision recorded
-        score += decisionImpact;
-        if (decisionImpact > 15) stressors.push({ name: 'Decision Fatigue', impact: decisionImpact });
-
-        // 4. Emotional Load (Multiplier)
+        // 3. Emotional Load (Multiplier)
         let emotionalImpact = 0;
         if (latestMood) {
             // Stress: 1-5. Impact: 5%, 10%, 20%, 30%, 40%
@@ -257,18 +242,6 @@ export const CLMApp: React.FC = () => {
                                     <div className="text-sm font-bold text-charcoal-600">{Math.min(habits.length * 3, 100)}%</div>
                                 </div>
 
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-charcoal-50 rounded-lg text-charcoal-600">
-                                            <Scale className="w-4 h-4" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-medium text-charcoal-700">Decision Fatigue</p>
-                                            <p className="text-xs text-charcoal-400">{todayDecisions.length} Decisions Today</p>
-                                        </div>
-                                    </div>
-                                    <div className="text-sm font-bold text-charcoal-600">{Math.min(todayDecisions.length * 5, 100)}%</div>
-                                </div>
 
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">

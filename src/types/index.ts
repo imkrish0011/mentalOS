@@ -1,3 +1,4 @@
+import React from 'react';
 import { Timestamp } from 'firebase/firestore';
 
 // User Profile
