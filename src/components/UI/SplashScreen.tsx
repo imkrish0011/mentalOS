@@ -36,7 +36,7 @@ export const SplashScreen: React.FC = () => {
                     </div>
                     <div className="text-center space-y-2">
                         <h1 className="font-display text-2xl font-bold text-charcoal-800 tracking-tight animate-fade-in-up">
-                            MentalOS
+                            ClarityOS
                         </h1>
                         <div className="h-1 w-12 bg-gradient-to-r from-cyan-400 via-purple-400 to-amber-400 rounded-full mx-auto" />
                     </div>
