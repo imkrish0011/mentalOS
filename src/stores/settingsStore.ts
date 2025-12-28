@@ -8,7 +8,7 @@ interface SettingsStore {
     toggleNotifications: () => void;
 }
 
-const DEFAULT_DOCK_APPS = ['goals', 'habits', 'journal', 'mood', 'settings'];
+const DEFAULT_DOCK_APPS = ['system', 'goals', 'habits', 'rituals', 'journal', 'mood', 'reflection', 'declutter', 'decision', 'principles', 'focus', 'settings'];
 
 export const useSettingsStore = create<SettingsStore>()(
     persist(
@@ -31,7 +31,7 @@ export const useSettingsStore = create<SettingsStore>()(
             })),
         }),
         {
-            name: 'mental-os-settings',
+            name: 'mental-os-settings-v3',
         }
     )
 );

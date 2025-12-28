@@ -6,14 +6,14 @@ import { UserManual } from '../../components/UI/UserManual';
 
 // ALL APPS Definition (Temporary duplication, ideally shared config)
 const ALL_APPS = [
+    { id: 'system', name: 'System' },
     { id: 'goals', name: 'Goals' },
     { id: 'habits', name: 'Habits' },
+    { id: 'rituals', name: 'Rituals' },
     { id: 'journal', name: 'Journal' },
     { id: 'mood', name: 'Mood' },
     { id: 'focus', name: 'Focus Mode' },
-    { id: 'clm', name: 'Cognitive Load' },
     { id: 'reflection', name: 'Reflection' },
-    { id: 'notifications', name: 'Notifications' },
     { id: 'declutter', name: 'Declutter' },
     { id: 'decision', name: 'Decisions' },
     { id: 'principles', name: 'Principles' },

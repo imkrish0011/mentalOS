@@ -72,6 +72,66 @@ export const Window: React.FC<WindowProps> = ({ window: win, children }) => {
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const windowRef = useRef<HTMLDivElement>(null);
 
+    const [isExiting, setIsExiting] = useState(false);
+    const [exitStyle, setExitStyle] = useState<React.CSSProperties>({});
+
+    // Function to calculate exit animation to dock icon
+    const animateToDock = useCallback((callback: () => void) => {
+        const dockIcon = document.querySelector(`[data-dock-app-id="${win.appId}"]`);
+
+        if (dockIcon) {
+            const iconRect = dockIcon.getBoundingClientRect();
+            const windowRect = windowRef.current?.getBoundingClientRect();
+
+            if (windowRect) {
+                // Calculate scale
+                // We want to scale down to roughly the size of the icon (48px)
+                const scaleX = 48 / windowRect.width;
+                const scaleY = 48 / windowRect.height;
+
+                // Calculate translation
+                // We need to move the center of the window to the center of the icon
+                const windowCenterX = windowRect.left + windowRect.width / 2;
+                const windowCenterY = windowRect.top + windowRect.height / 2;
+                const iconCenterX = iconRect.left + iconRect.width / 2;
+                const iconCenterY = iconRect.top + iconRect.height / 2;
+
+                const translateX = iconCenterX - windowCenterX;
+                const translateY = iconCenterY - windowCenterY;
+
+                setExitStyle({
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    transform: `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`,
+                    opacity: 0,
+                });
+                setIsExiting(true);
+
+                // Wait for animation to finish then execute callback
+                setTimeout(() => {
+                    callback();
+                }, 400); // Match transition duration
+                return;
+            }
+        }
+
+        // Fallback if no icon found or calculation failed
+        setExitStyle({
+            transition: 'all 0.3s ease-out',
+            opacity: 0,
+            transform: 'scale(0.9)'
+        });
+        setIsExiting(true);
+        setTimeout(callback, 300);
+    }, [win.appId, windowRef, win.id]);
+
+    const minimizeWithAnimation = () => {
+        animateToDock(() => minimizeWindow(win.id));
+    };
+
+    const closeWithAnimation = () => {
+        animateToDock(() => closeWindow(win.id));
+    };
+
     const isActive = activeWindowId === win.id;
     const isMaximized = win.state === 'maximized';
     const isMinimized = win.state === 'minimized';
@@ -125,30 +185,33 @@ export const Window: React.FC<WindowProps> = ({ window: win, children }) => {
         };
     }, [isDragging, isResizing, dragOffset, win.id, win.position, updateWindowPosition, updateWindowSize]);
 
-    if (isMinimized) return null;
+    if (isMinimized && !isExiting) return null;
 
-    const windowStyles: React.CSSProperties = isMaximized
-        ? {
-            position: 'fixed',
-            top: 48, // 3rem (Desktop Top Bar)
-            left: 0,
-            right: 0,
-            bottom: 56, // Dock height
-            width: '100%',
-            height: 'calc(100% - 48px - 56px)',
-            zIndex: win.zIndex,
-        }
-        : {
-            position: 'absolute',
-            left: isMobile ? 0 : win.position.x,
-            top: isMobile ? 48 : win.position.y,
-            width: isMobile ? '100%' : win.size.width,
-            height: isMobile ? 'calc(100% - 48px - 80px)' : win.size.height, // Adjust for dock on mobile
-            zIndex: win.zIndex,
-        };
+    const windowStyles: React.CSSProperties = {
+        ...(isMaximized
+            ? {
+                position: 'fixed',
+                top: 48, // 3rem (Desktop Top Bar)
+                left: 0,
+                right: 0,
+                bottom: 56, // Dock height
+                width: '100%',
+                height: 'calc(100% - 48px - 56px)',
+                zIndex: win.zIndex,
+            }
+            : {
+                position: 'absolute',
+                left: isMobile ? 0 : win.position.x,
+                top: isMobile ? 48 : win.position.y,
+                width: isMobile ? '100%' : win.size.width,
+                height: isMobile ? 'calc(100% - 48px - 80px)' : win.size.height, // Adjust for dock on mobile
+                zIndex: win.zIndex,
+            }),
+        ...exitStyle
+    };
 
     return (
-        !isMinimized ? (
+        (!isMinimized || isExiting) ? (
             <div
                 ref={windowRef}
                 style={windowStyles}
@@ -156,6 +219,7 @@ export const Window: React.FC<WindowProps> = ({ window: win, children }) => {
         flex flex-col bg-white rounded-xl overflow-hidden
         shadow-window border border-charcoal-100
         transition-shadow duration-200
+        ${!isExiting ? 'animate-scale-in' : ''}
         ${isActive ? 'ring-2 ring-sage-300/50' : ''}
         ${isDragging ? 'cursor-grabbing' : ''}
       `}
@@ -178,7 +242,7 @@ export const Window: React.FC<WindowProps> = ({ window: win, children }) => {
                     <div className="window-controls flex items-center gap-2">
                         {/* Minimize */}
                         <button
-                            onClick={() => minimizeWindow(win.id)}
+                            onClick={minimizeWithAnimation}
                             className="w-3 h-3 rounded-full bg-terracotta-300 hover:bg-terracotta-400 
                      transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-terracotta-300"
                             title="Minimize"
@@ -192,7 +256,7 @@ export const Window: React.FC<WindowProps> = ({ window: win, children }) => {
                         />
                         {/* Close */}
                         <button
-                            onClick={() => closeWindow(win.id)}
+                            onClick={closeWithAnimation}
                             className="w-3 h-3 rounded-full bg-sage-400 hover:bg-sage-500 
                      transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-sage-300"
                             title="Close"

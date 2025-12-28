@@ -17,12 +17,12 @@ import { JournalApp } from '../../apps/Journal/Journal';
 import { MoodApp } from '../../apps/Mood/Mood';
 import { SettingsApp } from '../../apps/Settings/Settings';
 import { FocusApp } from '../../apps/Focus/Focus';
-import { CLMApp } from '../../apps/CLM/CLM';
+import { PrinciplesApp } from '../../apps/Principles/Principles';
+import { RitualsApp } from '../../apps/Rituals/Rituals';
+import { SystemHealthApp } from '../../apps/SystemHealth/SystemHealth';
 import { ReflectionApp } from '../../apps/Reflection/Reflection';
-import { NotificationsApp } from '../../apps/Notifications/Notifications';
 import { DeclutterApp } from '../../apps/Declutter/Declutter';
 import { DecisionApp } from '../../apps/Decision/Decision';
-import { PrinciplesApp } from '../../apps/Principles/Principles';
 
 const appComponents: Record<string, React.ComponentType> = {
     goals: GoalsApp,
@@ -31,12 +31,12 @@ const appComponents: Record<string, React.ComponentType> = {
     mood: MoodApp,
     settings: SettingsApp,
     focus: FocusApp,
-    clm: CLMApp,
+    system: SystemHealthApp,
+    principles: PrinciplesApp,
+    rituals: RitualsApp,
     reflection: ReflectionApp,
-    notifications: NotificationsApp,
     declutter: DeclutterApp,
     decision: DecisionApp,
-    principles: PrinciplesApp,
 };
 
 export const Desktop: React.FC = () => {
@@ -77,7 +77,7 @@ export const Desktop: React.FC = () => {
     }, []);
 
     return (
-        <div className="relative w-full h-full overflow-hidden">
+        <div className="relative w-screen h-[100dvh] overflow-hidden">
             <SplashScreen />
             <UserManual isOpen={showOnboarding} onComplete={handleManualComplete} />
             <ZenMode isOpen={isZenModeOpen} onClose={() => setIsZenModeOpen(false)} />
@@ -98,7 +98,7 @@ export const Desktop: React.FC = () => {
                         <div className="w-8 h-8 flex items-center justify-center">
                             <Logo className="w-full h-full" />
                         </div>
-                        <span className="font-display font-medium text-charcoal-700">Mental Clarity OS</span>
+                        <span className="font-display font-medium text-charcoal-700 hidden sm:block">Mental Clarity OS</span>
                     </div>
 
                     <div className="flex items-center gap-2 sm:gap-4">

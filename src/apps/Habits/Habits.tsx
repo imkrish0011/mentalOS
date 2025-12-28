@@ -344,10 +344,8 @@ const HabitCard: React.FC<{
                                     opacity: 1
                                 }}
                                 transition={{
-                                    type: "spring",
-                                    stiffness: 400,
-                                    damping: 15,
-                                    duration: 0.4
+                                    duration: 0.4,
+                                    ease: "easeInOut"
                                 }}
                                 className={`h-7 rounded-lg flex items-center justify-center transition-all duration-300 ${completed
                                     ? `${colorClass} shadow-sm`

@@ -123,3 +123,22 @@ export interface AppDefinition {
     component: React.ComponentType;
     defaultSize: { width: number; height: number };
 }
+
+// Ritual/Routine Step
+export interface RitualStep {
+    id: string; // unique within ritual
+    title: string;
+    habitId?: string; // link to existing habit
+    duration: number; // minutes
+}
+
+// Ritual/Routine
+export interface Ritual {
+    id: string;
+    userId: string;
+    title: string;
+    description: string;
+    steps: RitualStep[];
+    createdAt: Timestamp;
+    updatedAt: Timestamp;
+}

@@ -15,7 +15,7 @@ import {
     QueryConstraint,
 } from 'firebase/firestore';
 import { db } from './firebase';
-import type { Goal, Habit, HabitLog, UserProfile, JournalEntry, MoodLog } from '../types';
+import type { Goal, Habit, HabitLog, UserProfile, JournalEntry, MoodLog, Ritual } from '../types';
 
 // Collection paths
 const USERS = 'users';
@@ -27,6 +27,7 @@ const MOOD_LOGS = 'moodLogs';
 const REFLECTIONS = 'reflections';
 const DECISIONS = 'decisions';
 const PRINCIPLES = 'principles';
+const RITUALS = 'rituals';
 
 // Helper to get user's subcollection
 const getUserCollection = (userId: string, collectionName: string) =>
@@ -61,13 +62,29 @@ export const createGoal = async (userId: string, goal: Omit<Goal, 'id' | 'userId
 };
 
 export const getGoals = async (userId: string, status?: 'active' | 'archived'): Promise<Goal[]> => {
-    const constraints: QueryConstraint[] = [orderBy('createdAt', 'desc')];
+    // If filtering by status, don't use orderBy(createdAt) in Firestore query to avoid index requirement
+    // Instead sort on client side
+    const constraints: QueryConstraint[] = [];
     if (status) {
-        constraints.unshift(where('status', '==', status));
+        constraints.push(where('status', '==', status));
+    } else {
+        constraints.push(orderBy('createdAt', 'desc'));
     }
+
     const q = query(getUserCollection(userId, GOALS), ...constraints);
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Goal));
+    const goals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Goal));
+
+    if (status) {
+        // Client-side sort if we couldn't do it on server
+        goals.sort((a, b) => {
+            const timeA = a.createdAt?.seconds || 0;
+            const timeB = b.createdAt?.seconds || 0;
+            return timeB - timeA;
+        });
+    }
+
+    return goals;
 };
 
 export const updateGoal = async (userId: string, goalId: string, data: Partial<Goal>): Promise<void> => {
@@ -86,13 +103,27 @@ export const subscribeToGoals = (
     callback: (goals: Goal[]) => void,
     status?: 'active' | 'archived'
 ) => {
-    const constraints: QueryConstraint[] = [orderBy('createdAt', 'desc')];
+    // If filtering, remove server-side sort to avoid index
+    const constraints: QueryConstraint[] = [];
     if (status) {
-        constraints.unshift(where('status', '==', status));
+        constraints.push(where('status', '==', status));
+    } else {
+        constraints.push(orderBy('createdAt', 'desc'));
     }
+
     const q = query(getUserCollection(userId, GOALS), ...constraints);
     return onSnapshot(q, (snapshot) => {
         const goals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Goal));
+
+        if (status) {
+            // Client-side sort
+            goals.sort((a, b) => {
+                const timeA = a.createdAt?.seconds || 0;
+                const timeB = b.createdAt?.seconds || 0;
+                return timeB - timeA;
+            });
+        }
+
         callback(goals);
     });
 };
@@ -380,4 +411,37 @@ export const getPrinciples = async (userId: string): Promise<Principle[]> => {
 
 export const deletePrinciple = async (userId: string, principleId: string): Promise<void> => {
     await deleteDoc(doc(db, USERS, userId, PRINCIPLES, principleId));
+};
+
+// ============= RITUALS =============
+
+export const createRitual = async (userId: string, ritual: Omit<Ritual, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<string> => {
+    const now = Timestamp.now();
+    const docRef = await addDoc(getUserCollection(userId, RITUALS), {
+        ...ritual,
+        userId,
+        createdAt: now,
+        updatedAt: now,
+    });
+    return docRef.id;
+};
+
+export const getRituals = async (userId: string): Promise<Ritual[]> => {
+    const q = query(
+        getUserCollection(userId, RITUALS),
+        orderBy('createdAt', 'desc')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Ritual));
+};
+
+export const updateRitual = async (userId: string, ritualId: string, data: Partial<Ritual>): Promise<void> => {
+    await updateDoc(doc(db, USERS, userId, RITUALS, ritualId), {
+        ...data,
+        updatedAt: Timestamp.now(),
+    });
+};
+
+export const deleteRitual = async (userId: string, ritualId: string): Promise<void> => {
+    await deleteDoc(doc(db, USERS, userId, RITUALS, ritualId));
 };

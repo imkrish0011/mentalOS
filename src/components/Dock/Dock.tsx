@@ -1,7 +1,7 @@
 import React from 'react';
 import { useWindowStore } from '../../stores/windowStore';
 import { useSettingsStore } from '../../stores/settingsStore';
-import { Target, Sparkles, BookOpen, Heart, Settings, Maximize2, Activity, RefreshCw, Bell, Layers, Scale, Anchor } from 'lucide-react';
+import { Target, Sparkles, BookOpen, Heart, Settings, Maximize2, Activity, RefreshCw, Bell, Layers, Scale, Anchor, PlayCircle, HeartPulse } from 'lucide-react';
 
 interface DockApp {
     id: string;
@@ -10,6 +10,11 @@ interface DockApp {
 }
 
 const dockApps: DockApp[] = [
+    {
+        id: 'system',
+        name: 'System',
+        icon: <HeartPulse className="w-6 h-6" />
+    },
     {
         id: 'goals',
         name: 'Goals',
@@ -21,6 +26,11 @@ const dockApps: DockApp[] = [
         icon: <Sparkles className="w-6 h-6" />
     },
     {
+        id: 'rituals',
+        name: 'Rituals',
+        icon: <PlayCircle className="w-6 h-6" />
+    },
+    {
         id: 'journal',
         name: 'Journal',
         icon: <BookOpen className="w-6 h-6" />
@@ -30,32 +40,28 @@ const dockApps: DockApp[] = [
         name: 'Mood',
         icon: <Heart className="w-6 h-6" />
     },
+    { id: 'focus', name: 'Focus Mode', icon: <Maximize2 className="w-6 h-6" /> },
+    { id: 'reflection', name: 'Reflection', icon: <RefreshCw className="w-6 h-6" /> },
+    { id: 'declutter', name: 'Declutter', icon: <Layers className="w-6 h-6" /> },
+    { id: 'decision', name: 'Decisions', icon: <Scale className="w-6 h-6" /> },
+    { id: 'principles', name: 'Principles', icon: <Anchor className="w-6 h-6" /> },
     {
         id: 'settings',
         name: 'Settings',
         icon: <Settings className="w-6 h-6" />
     },
-    { id: 'focus', name: 'Focus Mode', icon: <Maximize2 className="w-6 h-6" /> },
-    { id: 'clm', name: 'Cognitive Load', icon: <Activity className="w-6 h-6" /> },
-    { id: 'reflection', name: 'Reflection', icon: <RefreshCw className="w-6 h-6" /> },
-    { id: 'notifications', name: 'Notifications', icon: <Bell className="w-6 h-6" /> },
-    { id: 'declutter', name: 'Declutter', icon: <Layers className="w-6 h-6" /> },
-    { id: 'decision', name: 'Decisions', icon: <Scale className="w-6 h-6" /> },
-    { id: 'principles', name: 'Principles', icon: <Anchor className="w-6 h-6" /> },
 ];
 
 const appDefaultSizes: Record<string, { width: number; height: number }> = {
+    system: { width: 900, height: 600 },
     goals: { width: 700, height: 550 },
     habits: { width: 650, height: 500 },
+    rituals: { width: 800, height: 600 },
     journal: { width: 600, height: 650 },
     mood: { width: 550, height: 500 },
     settings: { width: 500, height: 450 },
     focus: { width: 500, height: 400 },
-    clm: { width: 600, height: 450 },
-    timeline: { width: 900, height: 600 },
     reflection: { width: 700, height: 600 },
-    energy: { width: 500, height: 500 },
-    notifications: { width: 500, height: 500 },
     declutter: { width: 400, height: 500 },
     decision: { width: 700, height: 600 },
     principles: { width: 600, height: 600 },
@@ -104,6 +110,7 @@ export const Dock: React.FC = () => {
                         {visibleApps.map((app) => (
                             <button
                                 key={app.id}
+                                data-dock-app-id={app.id}
                                 onClick={() => handleAppClick(app)}
                                 className={`
                   relative group flex items-center justify-center

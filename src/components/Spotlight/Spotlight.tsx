@@ -8,33 +8,33 @@ import { useWindowStore } from '../../stores/windowStore';
 // For now, I will start with a local definition to get it working efficiently.
 
 // Re-using icon imports just for this component
-import { Target, Sparkles, BookOpen, Heart, Settings, Maximize2, Activity, RefreshCw, Bell, Layers, Scale, Anchor } from 'lucide-react';
+import { Target, Sparkles, BookOpen, Heart, Settings, Maximize2, Activity, RefreshCw, Layers, Scale, Anchor, PlayCircle, HeartPulse } from 'lucide-react';
 
 const apps = [
+    { id: 'system', name: 'System', icon: HeartPulse },
     { id: 'goals', name: 'Goals', icon: Target },
     { id: 'habits', name: 'Habits', icon: Sparkles },
+    { id: 'rituals', name: 'Rituals', icon: PlayCircle },
     { id: 'journal', name: 'Journal', icon: BookOpen },
     { id: 'mood', name: 'Mood', icon: Heart },
-    { id: 'settings', name: 'Settings', icon: Settings },
     { id: 'focus', name: 'Focus Mode', icon: Maximize2 },
-    { id: 'clm', name: 'Cognitive Load', icon: Activity },
     { id: 'reflection', name: 'Reflection', icon: RefreshCw },
-    { id: 'notifications', name: 'Notifications', icon: Bell },
     { id: 'declutter', name: 'Declutter', icon: Layers },
     { id: 'decision', name: 'Decisions', icon: Scale },
     { id: 'principles', name: 'Principles', icon: Anchor },
+    { id: 'settings', name: 'Settings', icon: Settings },
 ];
 
 const appDefaultSizes: Record<string, { width: number; height: number }> = {
+    system: { width: 900, height: 600 },
     goals: { width: 700, height: 550 },
     habits: { width: 650, height: 500 },
+    rituals: { width: 800, height: 600 },
     journal: { width: 600, height: 650 },
     mood: { width: 550, height: 500 },
     settings: { width: 500, height: 450 },
     focus: { width: 500, height: 400 },
-    clm: { width: 600, height: 450 },
     reflection: { width: 700, height: 600 },
-    notifications: { width: 500, height: 500 },
     declutter: { width: 400, height: 500 },
     decision: { width: 700, height: 600 },
     principles: { width: 600, height: 600 },
